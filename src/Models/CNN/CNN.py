@@ -137,3 +137,32 @@ class CNN:
         
         self.model.load_weights(load_path)
         print(f"Loaded weights from {load_path}")
+
+    """ ------------------------------------- FORWARD PROPAGATION FROM SCRATCH ------------------------------------- """
+
+    def _conv2d_forward(self, x, W, b, stride = 1, padding = 0):
+        # x shape: (H, W, C_in)
+        # W shape: (kernel_h, kernel_w, C_in, C_out)
+        # b shape: (C_out,)
+
+        pass
+
+    def _max_pooling(self, x, pool_size = 2, stride = 2):
+        pass
+
+    def _avg_pooling(self, x, pool_size = 2, stride = 2):
+        pass
+    
+    def _flatten(self, x):
+        return x.flatten()
+
+    def _dense_forward(self, x, W, b, activation):
+        pass
+
+    def forward_scratch(self, input):
+        """
+        x_input: numpy array with shape (batch_size, 32, 32, 3)
+        output: predictions with shape (batch_size, 10)
+        """
+
+        pass
