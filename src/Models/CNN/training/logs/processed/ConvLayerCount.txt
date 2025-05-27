@@ -1,0 +1,59 @@
+=== ConvLayerCount Variations ===
+
+
+--- Training: 1 Layer ---
+Epoch 1/7
+625/625 - 9s - 14ms/step - accuracy: 0.4348 - loss: 1.5904 - val_accuracy: 0.5077 - val_loss: 1.3766
+Epoch 2/7
+625/625 - 8s - 13ms/step - accuracy: 0.5531 - loss: 1.2659 - val_accuracy: 0.5639 - val_loss: 1.2267
+Epoch 3/7
+625/625 - 8s - 13ms/step - accuracy: 0.6000 - loss: 1.1383 - val_accuracy: 0.5981 - val_loss: 1.1492
+Epoch 4/7
+625/625 - 8s - 13ms/step - accuracy: 0.6319 - loss: 1.0512 - val_accuracy: 0.5946 - val_loss: 1.1499
+Epoch 5/7
+625/625 - 8s - 13ms/step - accuracy: 0.6560 - loss: 0.9832 - val_accuracy: 0.6144 - val_loss: 1.1034
+Epoch 6/7
+625/625 - 8s - 13ms/step - accuracy: 0.6816 - loss: 0.9188 - val_accuracy: 0.6365 - val_loss: 1.0593
+Epoch 7/7
+625/625 - 8s - 13ms/step - accuracy: 0.6963 - loss: 0.8716 - val_accuracy: 0.6437 - val_loss: 1.0403
+
+Saved weights to Models/CNN/training/weights/ConvLayerCount\1layers_filters32_kernels3_poolmax.weights.h5
+1 Layer | Macro F1 Score: 0.6316
+
+--- Training: 2 Layers ---
+Epoch 1/7
+625/625 - 15s - 24ms/step - accuracy: 0.4609 - loss: 1.5030 - val_accuracy: 0.5678 - val_loss: 1.2370
+Epoch 2/7
+625/625 - 14s - 22ms/step - accuracy: 0.6091 - loss: 1.1256 - val_accuracy: 0.6094 - val_loss: 1.1286
+Epoch 3/7
+625/625 - 14s - 22ms/step - accuracy: 0.6585 - loss: 0.9803 - val_accuracy: 0.6595 - val_loss: 0.9878
+Epoch 4/7
+625/625 - 14s - 22ms/step - accuracy: 0.6879 - loss: 0.8967 - val_accuracy: 0.6624 - val_loss: 0.9585
+Epoch 5/7
+625/625 - 14s - 22ms/step - accuracy: 0.7120 - loss: 0.8315 - val_accuracy: 0.6949 - val_loss: 0.8782
+Epoch 6/7
+625/625 - 14s - 22ms/step - accuracy: 0.7321 - loss: 0.7687 - val_accuracy: 0.7038 - val_loss: 0.8745
+Epoch 7/7
+625/625 - 14s - 22ms/step - accuracy: 0.7547 - loss: 0.7121 - val_accuracy: 0.6775 - val_loss: 0.9487
+
+Saved weights to Models/CNN/training/weights/ConvLayerCount\2layers_filters32-64_kernels3-3_poolmax.weights.h5
+2 Layers | Macro F1 Score: 0.6803
+
+--- Training: 3 Layers ---
+Epoch 1/7
+625/625 - 18s - 29ms/step - accuracy: 0.4498 - loss: 1.5263 - val_accuracy: 0.5731 - val_loss: 1.2014
+Epoch 2/7
+625/625 - 17s - 28ms/step - accuracy: 0.6138 - loss: 1.0980 - val_accuracy: 0.6506 - val_loss: 0.9950
+Epoch 3/7
+625/625 - 17s - 28ms/step - accuracy: 0.6753 - loss: 0.9288 - val_accuracy: 0.6673 - val_loss: 0.9520
+Epoch 4/7
+625/625 - 18s - 28ms/step - accuracy: 0.7103 - loss: 0.8296 - val_accuracy: 0.7002 - val_loss: 0.8786
+Epoch 5/7
+625/625 - 18s - 28ms/step - accuracy: 0.7425 - loss: 0.7417 - val_accuracy: 0.7197 - val_loss: 0.8191
+Epoch 6/7
+625/625 - 18s - 28ms/step - accuracy: 0.7663 - loss: 0.6704 - val_accuracy: 0.7302 - val_loss: 0.7987
+Epoch 7/7
+625/625 - 17s - 28ms/step - accuracy: 0.7887 - loss: 0.6106 - val_accuracy: 0.7211 - val_loss: 0.8350
+
+Saved weights to Models/CNN/training/weights/ConvLayerCount\3layers_filters32-64-128_kernels3-3-3_poolmax.weights.h5
+3 Layers | Macro F1 Score: 0.7210
