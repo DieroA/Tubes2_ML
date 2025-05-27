@@ -9,6 +9,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, AveragePooling2D, Flatten, Dense, Input
 from tensorflow.keras.optimizers import Adam
 
+from Models.CNN.forward_layers import conv2d, pooling, flatten, dense
+
 # TODO: Forward prop from scratch
 class CNN:
     def __init__(self, n_conv_layers = 2, filters_per_layer = [32, 64], kernel_sizes = [3, 3], 
@@ -138,86 +140,15 @@ class CNN:
 
     """ ------------------------------------- FORWARD PROPAGATION FROM SCRATCH ------------------------------------- """
 
-    @staticmethod
-    def _calc_output_size(size, filter_size, padding, stride):
-        return ((size - filter_size + 2 * padding) // stride) + 1
+    def load_layer(self, layer_idx):
+        layer = self.model.layers[layer_idx]
+        W, b = layer.get_weights()
 
-    def _conv2d(self, x, W, b, stride = 1, padding = 0):
-        # x shape: (H_x, W_x, C_in)
-        # W shape: (H_k, W_k, C_in, C_out)
-        # b shape: (C_out, 1)
-        # W_out = ((W_x - W_k + 2 * padding) / S) + 1
-        # output feature map shape: (W_out, W_out, C_out)
+        # Make sure weights and biases are of the correct type (float32)
+        W = W.astype(np.float32)
+        b = b.astype(np.float32)
 
-        H_x, W_x, _ = x.shape
-        H_k, W_k, _, C_out = W.shape
-
-        # Add paddding
-        x_padded = np.pad(x, ((padding, padding), (padding, padding), (0, 0)), mode = "constant")
-
-        # Calculate output shape
-        W_out = CNN._calc_output_size(W_x, W_k, stride, padding)
-        H_out = CNN._calc_output_size(H_x, W_k, stride, padding)
-        
-        # Calculate feature map
-        out = np.zeros((H_out, W_out, C_out))
-        for row in range(H_out):
-            for col in range(W_out):
-                row_start = row * stride
-                row_end = row_start + H_k
-
-                col_start = col * stride
-                col_end = col_start + W_k
-
-                patch = x_padded[row_start: row_end, col_start: col_end, :]
-                for channel in range(C_out):
-                    out[row, col, channel] = np.sum(patch * W[:, :, :, channel] + b[channel])
-
-        # ReLU
-        out_relu = np.maximum(out, 0)
-
-        return out_relu
-
-    def _pooling(self, x, pool_size = 2, stride = 2, type = "max"):
-        H_x, W_x, C_in = x.shape
-
-        if type == "max":
-            pooling_func = np.max
-        else:
-            pooling_func = np.mean
-
-        # Calculate output shape
-        W_out = CNN._calc_output_size(W_x, pool_size, 0, stride)
-        H_out = CNN._calc_output_size(H_x, pool_size, 0, stride)
-
-        # Calculate output
-        out = np.zeros((H_out, W_out, C_in))
-        for row in range(H_out):
-            for col in range(W_out):
-                row_start = row * stride
-                row_end = row_start + pool_size
-
-                col_start = col * stride
-                col_end = col_start + pool_size
-
-                patch = x[row_start: row_end, col_start: col_end, :]
-
-                out[row, col, :] = pooling_func(patch, axis = (0, 1))
-        return out
-    
-    def _flatten(self, x):
-        return x.flatten()
-
-    def _dense(self, x, W, b, activation):
-        out = np.dot(x, W) + b
-        if activation == "relu":
-            return np.maximum(out, 0)
-        elif activation == "softmax":
-            e_out = np.exp(out - np.max(out))
-
-            return e_out / np.sum(e_out)
-        else:
-            raise ValueError(f"Invalid activation method `{activation}`.")
+        return layer, W, b
 
     def forward_scratch(self, input):
         if self.model is None:
@@ -230,35 +161,32 @@ class CNN:
 
             for i in range(self.n_conv_layers):
                 # Conv Layer
-                conv_layer = self.model.layers[layer_idx]
-                
-                W, b = conv_layer.get_weights()
+                _, W_conv, b_conv = self.load_layer(layer_idx)
+
                 kernel_size = self.kernel_sizes[i]
                 padding = kernel_size // 2 # "same" padding
 
-                x = self._conv2d(x, W, b, padding = padding)
+                x = conv2d(x, W_conv, b_conv, padding = padding)
                 layer_idx += 1
 
                 # Pooling Layer
-                x = self._pooling(x, type = self.pooling_type)
+                x = pooling(x, type = self.pooling_type)
                 layer_idx += 1
 
             # Flatten
-            x = self._flatten(x)
+            x = flatten(x)
             layer_idx += 1
 
             # Dense Layer 1
-            dense_layer_1 = self.model.layers[layer_idx]
-            W_d1, b_d1 = dense_layer_1.get_weights()
+            dense_layer_1, W_d1, b_d1 = self.load_layer(layer_idx)
             
-            x = self._dense(x, W_d1, b_d1, dense_layer_1.activation.__name__)
+            x = dense(x, W_d1, b_d1, dense_layer_1.activation.__name__)
             layer_idx += 1
 
             # Dense Layer 2 (Output)
-            output_layer = self.model.layers[layer_idx]
-            W_o, b_o = output_layer.get_weights()
+            output_layer, W_o, b_o = self.load_layer(layer_idx)
 
-            x = self._dense(x, W_o, b_o, output_layer.activation.__name__)
+            x = dense(x, W_o, b_o, output_layer.activation.__name__)
 
             # Append final result
             out.append(x)

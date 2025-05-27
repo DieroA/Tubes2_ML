@@ -1,5 +1,6 @@
 from tensorflow.keras.datasets import cifar10
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 # Load
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -9,7 +10,7 @@ x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size = 
 
 # Normalize
 def normalize_x(x):
-    return x.astype("float32") / 255.0
+    return x.astype(np.float32) / 255.0
 
 x_train = normalize_x(x_train)
 x_val = normalize_x(x_val)

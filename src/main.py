@@ -5,8 +5,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 from Models.CNN.CNN import CNN
 from Models.CNN.training.configs import CONV_LAYER_VARIATIONS
 
-import numpy as np
-
 from Datasets.cifar10 import x_test, y_test
 
 def main():
@@ -19,8 +17,6 @@ def main():
 
     # Forward prop
     output = cnn.forward_scratch(x_test)
-    y_pred = np.argmax(output, axis = 1)
-    print(y_pred[:30])
     
     # Evaluate
     cnn.evaluate(output, y_test)
