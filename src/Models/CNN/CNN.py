@@ -1,6 +1,7 @@
 import os
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
+from tqdm import tqdm
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import f1_score
@@ -11,7 +12,7 @@ from tensorflow.keras.optimizers import Adam
 # TODO: Forward prop from scratch
 class CNN:
     def __init__(self, n_conv_layers = 2, filters_per_layer = [32, 64], kernel_sizes = [3, 3], 
-                 pooling_type = "max", n_epoch = 5, weights_dir = "src/Models/CNN/weights"):
+                 pooling_type = "max", n_epoch = 5, weights_dir = "Models/CNN/training/weights"):
         self.n_conv_layers = n_conv_layers
         self.filters_per_layer = filters_per_layer
         self.kernel_sizes = kernel_sizes
@@ -65,8 +66,10 @@ class CNN:
         # Flatten
         self.model.add(Flatten())
 
-        # Dense
+        # Dense 1
         self.model.add(Dense(64, activation = "relu"))
+
+        # Dense 2 (Output)
         self.model.add(Dense(10, activation = "softmax"))
         
         self.model.compile(
@@ -89,12 +92,7 @@ class CNN:
             verbose = 2
         )
 
-    def evaluate(self, x_test, y_test):
-        # Check if model has been built and trained
-        if self.model is None:
-            raise ValueError("Model needs to be built before calling evaluate_model.")
-
-        y_pred_probs = self.model.predict(x_test)
+    def evaluate(self, y_pred_probs, y_test):
         y_pred = np.argmax(y_pred_probs, axis = 1)
         y_true = y_test.flatten()
 
@@ -140,29 +138,128 @@ class CNN:
 
     """ ------------------------------------- FORWARD PROPAGATION FROM SCRATCH ------------------------------------- """
 
-    def _conv2d_forward(self, x, W, b, stride = 1, padding = 0):
-        # x shape: (H, W, C_in)
-        # W shape: (kernel_h, kernel_w, C_in, C_out)
-        # b shape: (C_out,)
+    @staticmethod
+    def _calc_output_size(size, filter_size, padding, stride):
+        return ((size - filter_size + 2 * padding) // stride) + 1
 
-        pass
+    def _conv2d(self, x, W, b, stride = 1, padding = 0):
+        # x shape: (H_x, W_x, C_in)
+        # W shape: (H_k, W_k, C_in, C_out)
+        # b shape: (C_out, 1)
+        # W_out = ((W_x - W_k + 2 * padding) / S) + 1
+        # output feature map shape: (W_out, W_out, C_out)
 
-    def _max_pooling(self, x, pool_size = 2, stride = 2):
-        pass
+        H_x, W_x, _ = x.shape
+        H_k, W_k, _, C_out = W.shape
 
-    def _avg_pooling(self, x, pool_size = 2, stride = 2):
-        pass
+        # Add paddding
+        x_padded = np.pad(x, ((padding, padding), (padding, padding), (0, 0)), mode = "constant")
+
+        # Calculate output shape
+        W_out = CNN._calc_output_size(W_x, W_k, stride, padding)
+        H_out = CNN._calc_output_size(H_x, W_k, stride, padding)
+        
+        # Calculate feature map
+        out = np.zeros((H_out, W_out, C_out))
+        for row in range(H_out):
+            for col in range(W_out):
+                row_start = row * stride
+                row_end = row_start + H_k
+
+                col_start = col * stride
+                col_end = col_start + W_k
+
+                patch = x_padded[row_start: row_end, col_start: col_end, :]
+                for channel in range(C_out):
+                    out[row, col, channel] = np.sum(patch * W[:, :, :, channel] + b[channel])
+
+        # ReLU
+        out_relu = np.maximum(out, 0)
+
+        return out_relu
+
+    def _pooling(self, x, pool_size = 2, stride = 2, type = "max"):
+        H_x, W_x, C_in = x.shape
+
+        if type == "max":
+            pooling_func = np.max
+        else:
+            pooling_func = np.mean
+
+        # Calculate output shape
+        W_out = CNN._calc_output_size(W_x, pool_size, 0, stride)
+        H_out = CNN._calc_output_size(H_x, pool_size, 0, stride)
+
+        # Calculate output
+        out = np.zeros((H_out, W_out, C_in))
+        for row in range(H_out):
+            for col in range(W_out):
+                row_start = row * stride
+                row_end = row_start + pool_size
+
+                col_start = col * stride
+                col_end = col_start + pool_size
+
+                patch = x[row_start: row_end, col_start: col_end, :]
+
+                out[row, col, :] = pooling_func(patch, axis = (0, 1))
+        return out
     
     def _flatten(self, x):
         return x.flatten()
 
-    def _dense_forward(self, x, W, b, activation):
-        pass
+    def _dense(self, x, W, b, activation):
+        out = np.dot(x, W) + b
+        if activation == "relu":
+            return np.maximum(out, 0)
+        elif activation == "softmax":
+            e_out = np.exp(out - np.max(out))
+
+            return e_out / np.sum(e_out)
+        else:
+            raise ValueError(f"Invalid activation method `{activation}`.")
 
     def forward_scratch(self, input):
-        """
-        x_input: numpy array with shape (batch_size, 32, 32, 3)
-        output: predictions with shape (batch_size, 10)
-        """
+        if self.model is None:
+            raise ValueError("Model must be built and trained before using forward_scratch")
+        
+        out = []
+        for img in tqdm(input, desc = "Forward Propagation", ncols = 80):
+            x = img
+            layer_idx = 0
 
-        pass
+            for i in range(self.n_conv_layers):
+                # Conv Layer
+                conv_layer = self.model.layers[layer_idx]
+                
+                W, b = conv_layer.get_weights()
+                kernel_size = self.kernel_sizes[i]
+                padding = kernel_size // 2 # "same" padding
+
+                x = self._conv2d(x, W, b, padding = padding)
+                layer_idx += 1
+
+                # Pooling Layer
+                x = self._pooling(x, type = self.pooling_type)
+                layer_idx += 1
+
+            # Flatten
+            x = self._flatten(x)
+            layer_idx += 1
+
+            # Dense Layer 1
+            dense_layer_1 = self.model.layers[layer_idx]
+            W_d1, b_d1 = dense_layer_1.get_weights()
+            
+            x = self._dense(x, W_d1, b_d1, dense_layer_1.activation.__name__)
+            layer_idx += 1
+
+            # Dense Layer 2 (Output)
+            output_layer = self.model.layers[layer_idx]
+            W_o, b_o = output_layer.get_weights()
+
+            x = self._dense(x, W_o, b_o, output_layer.activation.__name__)
+
+            # Append final result
+            out.append(x)
+        return np.array(out)

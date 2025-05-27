@@ -1,0 +1,47 @@
+=== Filter Size Variations ===
+
+
+--- Training: Filters 16-32 ---
+Epoch 1/5
+625/625 - 12s - 19ms/step - accuracy: 0.4189 - loss: 1.6144 - val_accuracy: 0.5197 - val_loss: 1.3562
+Epoch 2/5
+625/625 - 11s - 17ms/step - accuracy: 0.5511 - loss: 1.2658 - val_accuracy: 0.5641 - val_loss: 1.2340
+Epoch 3/5
+625/625 - 12s - 19ms/step - accuracy: 0.6035 - loss: 1.1285 - val_accuracy: 0.6074 - val_loss: 1.1256
+Epoch 4/5
+625/625 - 11s - 18ms/step - accuracy: 0.6375 - loss: 1.0375 - val_accuracy: 0.6360 - val_loss: 1.0498
+Epoch 5/5
+625/625 - 12s - 18ms/step - accuracy: 0.6597 - loss: 0.9726 - val_accuracy: 0.6480 - val_loss: 1.0190
+
+Filters 16-32 | Hasil Akhir Prediksi (30 Pertama): [3 1 8 0 6 6 1 6 3 1 0 9 5 7 9 8 5 3 8 6 7 2 2 9 4 4 4 0 9 6]
+Filters 16-32 | Macro F1 Score: 0.6532
+
+--- Training: Filters 32-64 ---
+Epoch 1/5
+625/625 - 19s - 31ms/step - accuracy: 0.4455 - loss: 1.5365 - val_accuracy: 0.5573 - val_loss: 1.2578
+Epoch 2/5
+625/625 - 19s - 30ms/step - accuracy: 0.5891 - loss: 1.1749 - val_accuracy: 0.5952 - val_loss: 1.1484
+Epoch 3/5
+625/625 - 20s - 31ms/step - accuracy: 0.6371 - loss: 1.0372 - val_accuracy: 0.6508 - val_loss: 1.0134
+Epoch 4/5
+625/625 - 18s - 29ms/step - accuracy: 0.6751 - loss: 0.9377 - val_accuracy: 0.6562 - val_loss: 0.9996
+Epoch 5/5
+625/625 - 18s - 29ms/step - accuracy: 0.6947 - loss: 0.8773 - val_accuracy: 0.6663 - val_loss: 0.9648
+
+Filters 32-64 | Hasil Akhir Prediksi (30 Pertama): [3 8 8 0 6 6 1 4 3 1 4 9 5 7 9 8 5 5 8 6 7 2 2 9 4 2 4 4 9 6]
+Filters 32-64 | Macro F1 Score: 0.6647
+
+--- Training: Filters 64-128 ---
+Epoch 1/5
+625/625 - 35s - 56ms/step - accuracy: 0.4556 - loss: 1.5115 - val_accuracy: 0.5762 - val_loss: 1.2190
+Epoch 2/5
+625/625 - 37s - 59ms/step - accuracy: 0.6080 - loss: 1.1135 - val_accuracy: 0.6429 - val_loss: 1.0321
+Epoch 3/5
+625/625 - 33s - 53ms/step - accuracy: 0.6651 - loss: 0.9631 - val_accuracy: 0.6591 - val_loss: 0.9786
+Epoch 4/5
+625/625 - 34s - 54ms/step - accuracy: 0.6970 - loss: 0.8688 - val_accuracy: 0.6816 - val_loss: 0.9226
+Epoch 5/5
+625/625 - 33s - 54ms/step - accuracy: 0.7237 - loss: 0.7938 - val_accuracy: 0.6947 - val_loss: 0.8894
+
+Filters 64-128 | Hasil Akhir Prediksi (30 Pertama): [3 8 8 8 6 6 1 4 3 1 0 9 5 7 9 6 5 3 8 6 7 2 2 9 4 2 4 0 9 6]
+Filters 64-128 | Macro F1 Score: 0.6883
