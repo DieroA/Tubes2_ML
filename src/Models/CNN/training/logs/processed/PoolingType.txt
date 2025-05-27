@@ -1,0 +1,40 @@
+=== PoolingType Variations ===
+
+
+--- Training: Max Pooling ---
+Epoch 1/7
+625/625 - 14s - 23ms/step - accuracy: 0.4619 - loss: 1.5038 - val_accuracy: 0.5494 - val_loss: 1.2668
+Epoch 2/7
+625/625 - 14s - 22ms/step - accuracy: 0.5938 - loss: 1.1580 - val_accuracy: 0.6220 - val_loss: 1.0960
+Epoch 3/7
+625/625 - 14s - 22ms/step - accuracy: 0.6465 - loss: 1.0085 - val_accuracy: 0.6547 - val_loss: 0.9894
+Epoch 4/7
+625/625 - 14s - 23ms/step - accuracy: 0.6824 - loss: 0.9143 - val_accuracy: 0.6612 - val_loss: 0.9733
+Epoch 5/7
+625/625 - 14s - 22ms/step - accuracy: 0.7031 - loss: 0.8501 - val_accuracy: 0.6843 - val_loss: 0.9195
+Epoch 6/7
+625/625 - 14s - 22ms/step - accuracy: 0.7250 - loss: 0.7911 - val_accuracy: 0.6911 - val_loss: 0.9013
+Epoch 7/7
+625/625 - 14s - 22ms/step - accuracy: 0.7469 - loss: 0.7335 - val_accuracy: 0.6768 - val_loss: 0.9637
+
+Saved weights to Models/CNN/training/weights/PoolingType\2layers_filters32-64_kernels3-3_poolmax.weights.h5
+Max Pooling | Macro F1 Score: 0.6751
+
+--- Training: Avg Pooling ---
+Epoch 1/7
+625/625 - 14s - 22ms/step - accuracy: 0.4364 - loss: 1.5633 - val_accuracy: 0.5326 - val_loss: 1.3113
+Epoch 2/7
+625/625 - 13s - 21ms/step - accuracy: 0.5573 - loss: 1.2504 - val_accuracy: 0.5764 - val_loss: 1.2050
+Epoch 3/7
+625/625 - 13s - 21ms/step - accuracy: 0.6052 - loss: 1.1212 - val_accuracy: 0.6215 - val_loss: 1.0756
+Epoch 4/7
+625/625 - 13s - 21ms/step - accuracy: 0.6393 - loss: 1.0307 - val_accuracy: 0.6453 - val_loss: 1.0127
+Epoch 5/7
+625/625 - 13s - 21ms/step - accuracy: 0.6665 - loss: 0.9547 - val_accuracy: 0.6494 - val_loss: 0.9980
+Epoch 6/7
+625/625 - 13s - 21ms/step - accuracy: 0.6853 - loss: 0.8997 - val_accuracy: 0.6752 - val_loss: 0.9383
+Epoch 7/7
+625/625 - 13s - 21ms/step - accuracy: 0.7026 - loss: 0.8525 - val_accuracy: 0.6763 - val_loss: 0.9434
+
+Saved weights to Models/CNN/training/weights/PoolingType\2layers_filters32-64_kernels3-3_poolaverage.weights.h5
+Avg Pooling | Macro F1 Score: 0.6681

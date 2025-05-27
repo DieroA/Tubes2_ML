@@ -1,6 +1,7 @@
 import os
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
+from tqdm import tqdm
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import f1_score
@@ -8,10 +9,12 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, AveragePooling2D, Flatten, Dense, Input
 from tensorflow.keras.optimizers import Adam
 
+from Models.CNN.forward_layers import conv2d, pooling, flatten, dense
+
 # TODO: Forward prop from scratch
 class CNN:
     def __init__(self, n_conv_layers = 2, filters_per_layer = [32, 64], kernel_sizes = [3, 3], 
-                 pooling_type = "max", n_epoch = 5, weights_dir = "src/Models/CNN/weights"):
+                 pooling_type = "max", n_epoch = 5, weights_dir = "Models/CNN/training/weights"):
         self.n_conv_layers = n_conv_layers
         self.filters_per_layer = filters_per_layer
         self.kernel_sizes = kernel_sizes
@@ -65,8 +68,10 @@ class CNN:
         # Flatten
         self.model.add(Flatten())
 
-        # Dense
+        # Dense 1
         self.model.add(Dense(64, activation = "relu"))
+
+        # Dense 2 (Output)
         self.model.add(Dense(10, activation = "softmax"))
         
         self.model.compile(
@@ -89,12 +94,7 @@ class CNN:
             verbose = 2
         )
 
-    def evaluate(self, x_test, y_test):
-        # Check if model has been built and trained
-        if self.model is None:
-            raise ValueError("Model needs to be built before calling evaluate_model.")
-
-        y_pred_probs = self.model.predict(x_test)
+    def evaluate(self, y_pred_probs, y_test):
         y_pred = np.argmax(y_pred_probs, axis = 1)
         y_true = y_test.flatten()
 
@@ -137,3 +137,57 @@ class CNN:
         
         self.model.load_weights(load_path)
         print(f"Loaded weights from {load_path}")
+
+    """ ------------------------------------- FORWARD PROPAGATION FROM SCRATCH ------------------------------------- """
+
+    def load_layer(self, layer_idx):
+        layer = self.model.layers[layer_idx]
+        W, b = layer.get_weights()
+
+        # Make sure weights and biases are of the correct type (float32)
+        W = W.astype(np.float32)
+        b = b.astype(np.float32)
+
+        return layer, W, b
+
+    def forward_scratch(self, input):
+        if self.model is None:
+            raise ValueError("Model must be built and trained before using forward_scratch")
+        
+        out = []
+        for img in tqdm(input, desc = "Forward Propagation", ncols = 80):
+            x = img
+            layer_idx = 0
+
+            for i in range(self.n_conv_layers):
+                # Conv Layer
+                _, W_conv, b_conv = self.load_layer(layer_idx)
+
+                kernel_size = self.kernel_sizes[i]
+                padding = kernel_size // 2 # "same" padding
+
+                x = conv2d(x, W_conv, b_conv, padding = padding)
+                layer_idx += 1
+
+                # Pooling Layer
+                x = pooling(x, type = self.pooling_type)
+                layer_idx += 1
+
+            # Flatten
+            x = flatten(x)
+            layer_idx += 1
+
+            # Dense Layer 1
+            dense_layer_1, W_d1, b_d1 = self.load_layer(layer_idx)
+            
+            x = dense(x, W_d1, b_d1, dense_layer_1.activation.__name__)
+            layer_idx += 1
+
+            # Dense Layer 2 (Output)
+            output_layer, W_o, b_o = self.load_layer(layer_idx)
+
+            x = dense(x, W_o, b_o, output_layer.activation.__name__)
+
+            # Append final result
+            out.append(x)
+        return np.array(out)

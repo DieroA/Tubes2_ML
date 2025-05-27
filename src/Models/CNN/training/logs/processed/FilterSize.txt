@@ -1,0 +1,59 @@
+=== FilterSize Variations ===
+
+
+--- Training: Filters 16-32 ---
+Epoch 1/7
+625/625 - 9s - 15ms/step - accuracy: 0.4492 - loss: 1.5454 - val_accuracy: 0.5059 - val_loss: 1.3885
+Epoch 2/7
+625/625 - 9s - 14ms/step - accuracy: 0.5698 - loss: 1.2266 - val_accuracy: 0.5406 - val_loss: 1.3057
+Epoch 3/7
+625/625 - 8s - 13ms/step - accuracy: 0.6150 - loss: 1.1030 - val_accuracy: 0.6140 - val_loss: 1.0931
+Epoch 4/7
+625/625 - 8s - 13ms/step - accuracy: 0.6475 - loss: 1.0101 - val_accuracy: 0.6317 - val_loss: 1.0611
+Epoch 5/7
+625/625 - 9s - 14ms/step - accuracy: 0.6680 - loss: 0.9458 - val_accuracy: 0.6569 - val_loss: 0.9841
+Epoch 6/7
+625/625 - 8s - 13ms/step - accuracy: 0.6899 - loss: 0.8941 - val_accuracy: 0.6623 - val_loss: 0.9633
+Epoch 7/7
+625/625 - 8s - 13ms/step - accuracy: 0.7040 - loss: 0.8490 - val_accuracy: 0.6557 - val_loss: 0.9823
+
+Saved weights to Models/CNN/training/weights/FilterSize\2layers_filters16-32_kernels3-3_poolmax.weights.h5
+Filters 16-32 | Macro F1 Score: 0.6563
+
+--- Training: Filters 32-64 ---
+Epoch 1/7
+625/625 - 15s - 24ms/step - accuracy: 0.4680 - loss: 1.4841 - val_accuracy: 0.5674 - val_loss: 1.2188
+Epoch 2/7
+625/625 - 14s - 22ms/step - accuracy: 0.6064 - loss: 1.1226 - val_accuracy: 0.6292 - val_loss: 1.0641
+Epoch 3/7
+625/625 - 14s - 22ms/step - accuracy: 0.6597 - loss: 0.9763 - val_accuracy: 0.6479 - val_loss: 1.0148
+Epoch 4/7
+625/625 - 14s - 22ms/step - accuracy: 0.6949 - loss: 0.8818 - val_accuracy: 0.6795 - val_loss: 0.9225
+Epoch 5/7
+625/625 - 14s - 22ms/step - accuracy: 0.7212 - loss: 0.8073 - val_accuracy: 0.6821 - val_loss: 0.9180
+Epoch 6/7
+625/625 - 14s - 22ms/step - accuracy: 0.7420 - loss: 0.7427 - val_accuracy: 0.6900 - val_loss: 0.9014
+Epoch 7/7
+625/625 - 14s - 22ms/step - accuracy: 0.7624 - loss: 0.6840 - val_accuracy: 0.6927 - val_loss: 0.8954
+
+Saved weights to Models/CNN/training/weights/FilterSize\2layers_filters32-64_kernels3-3_poolmax.weights.h5
+Filters 32-64 | Macro F1 Score: 0.6936
+
+--- Training: Filters 64-128 ---
+Epoch 1/7
+625/625 - 25s - 40ms/step - accuracy: 0.4627 - loss: 1.5032 - val_accuracy: 0.5602 - val_loss: 1.2692
+Epoch 2/7
+625/625 - 24s - 38ms/step - accuracy: 0.6115 - loss: 1.1068 - val_accuracy: 0.6550 - val_loss: 1.0043
+Epoch 3/7
+625/625 - 24s - 38ms/step - accuracy: 0.6695 - loss: 0.9491 - val_accuracy: 0.6653 - val_loss: 0.9560
+Epoch 4/7
+625/625 - 24s - 38ms/step - accuracy: 0.7036 - loss: 0.8543 - val_accuracy: 0.6778 - val_loss: 0.9099
+Epoch 5/7
+625/625 - 24s - 38ms/step - accuracy: 0.7330 - loss: 0.7757 - val_accuracy: 0.7027 - val_loss: 0.8666
+Epoch 6/7
+625/625 - 24s - 38ms/step - accuracy: 0.7499 - loss: 0.7196 - val_accuracy: 0.6939 - val_loss: 0.8789
+Epoch 7/7
+625/625 - 24s - 38ms/step - accuracy: 0.7720 - loss: 0.6549 - val_accuracy: 0.7108 - val_loss: 0.8492
+
+Saved weights to Models/CNN/training/weights/FilterSize\2layers_filters64-128_kernels3-3_poolmax.weights.h5
+Filters 64-128 | Macro F1 Score: 0.7081
