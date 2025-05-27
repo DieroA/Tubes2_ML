@@ -44,7 +44,7 @@ def train_and_evaluate_all(variation_dict, variation_name):
 
         # Train & Evaluate
         model.train(x_train, y_train, x_val, y_val)
-        y_pred_probs = model.predict(x_test)
+        y_pred_probs = model.model.predict(x_test)
         model.evaluate(y_pred_probs, y_test)
 
         # Save weights
