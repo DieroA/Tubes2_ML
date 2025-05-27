@@ -26,7 +26,7 @@ def compare_scratch_keras_cnn():
     cnn.evaluate(output_keras, y_test)
     score_keras = cnn.f1_score
 
-    # Evaluate 
+    # Output
     print(f"From Scratch | F1-Score: {score_scratch}")
     print(f"Keras | F1-Score: {score_keras}")
 
