@@ -4,4 +4,6 @@ matplotlib
 scikit-learn
 tqdm
 numba
+notebook
+ipykernel
 pandas
