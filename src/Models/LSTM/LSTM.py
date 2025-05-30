@@ -2,6 +2,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Bidirectional, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from sklearn.metrics import f1_score
+from Models.LSTM.LSTM_forward import LSTMScratch
 import pathlib
 import numpy as np
 import os
@@ -161,10 +162,8 @@ class LSTMModel:
         if self.model is None:
             raise ValueError("Model needs to be built before calling save_model.")
 
-        # Create directory if it doesn't exist yet
         os.makedirs(self.weights_dir, exist_ok = True)
 
-        # Build unique save file name
         name = f"{len(self.units)}layers"
         for idx, unit in enumerate (self.units):
             name += f"_{unit}"
@@ -175,7 +174,6 @@ class LSTMModel:
 
         filename = name + ".weights.h5"
 
-        # Save to save_dir
         filepath = os.path.join(self.weights_dir, filename)
         
         self.model.save_weights(filepath)
@@ -197,4 +195,54 @@ class LSTMModel:
         self.model.load_weights(path)
         print(f"Model weights loaded from {path}")
         
+    def predict_with_scratch(self, X):
+        """
+        Lakukan prediksi menggunakan implementasi forward propagation dari scratch.
+        
+        Args:
+            X: Input data (batch_size, sequence_length)
+            
+        Returns:
+            Predicted classes
+        """
+        if not hasattr(self, 'scratch_predictor'):
+            self.scratch_predictor = LSTMScratch(self.model)
+        
+        return self.scratch_predictor.predict(X)
+    
+    def evaluate_from_scratch(self, X_test, y_test):
+        """Evaluate the LSTM model using our from-scratch implementation"""
+        if self.model is None:
+            raise ValueError("Model needs to be built before calling evaluate.")
 
+        y_pred = self.predict_with_scratch(X_test)
+        # print(f"Output shape: {output.shape}")
+        # print(f"Output sample: {output}")
+        # y_pred = np.argmax(output, axis=1)
+        y_true = y_test.squeeze()
+        self.f1_score = f1_score(y_true, y_pred, average='weighted')
+        if self.f1_score is None:
+            raise ValueError("F1 score calculation failed. Please check the predictions and true labels.")
+        print(f"F1 Score: {self.f1_score:.4f}")
+        
+        return self.f1_score
+    
+    def compare_predictions(self, X, num_samples=5):
+        """
+        Bandingkan prediksi dari Keras dan implementasi scratch.
+        
+        Args:
+            X: Input data
+            num_samples: Jumlah sampel untuk ditampilkan
+        """
+        keras_pred = np.argmax(self.model.predict(X[:num_samples]), axis=1)
+        scratch_pred = self.predict_with_scratch(X[:num_samples])
+        
+        print("\nPerbandingan Prediksi:")
+        print(f"{'Sample':<10} {'Keras':<10} {'Scratch':<10}")
+        print("-" * 30)
+        for i in range(num_samples):
+            print(f"{i:<10} {keras_pred[i]:<10} {scratch_pred[i]:<10}")
+        
+        match = np.mean(keras_pred == scratch_pred) * 100
+        print(f"\nKesamaan prediksi: {match:.2f}%")
