@@ -3,29 +3,37 @@ import numpy as np
 import tensorflow as tf
 from keras import Sequential, layers, optimizers
 from sklearn.metrics import f1_score
+from tqdm import tqdm
+from Models.SimpleRNN.forward_layers_rnn import (
+    embedding_forward, 
+    rnn_layer_forward, 
+    bidirectional_rnn_layer_forward,
+    dense_forward, 
+    dropout_forward
+)
 
 
 class SimpleRNNModel:
-    def __init__(self, vocab_size: int, embedding_dim: int, rnn_units, num_classes: int, sequence_length: int, bidirectional=False, w_dir: str = "src/Models/SimpleRNN/training/weights"):
+    def __init__(self, vocab_size: int, embedding_dim: int, rnn_unit, num_classes: int, sequence_length: int, bidirectional=False, w_dir: str = "src/Models/SimpleRNN/training/weights"):
         self.vocab_size        = vocab_size
         self.embedding_dim     = embedding_dim
 
         # Kalau integer, jadiin list
-        if isinstance(rnn_units, int):
-            self.rnn_units = [rnn_units]
+        if isinstance(rnn_unit, int):
+            self.rnn_unit = [rnn_unit]
         # Kalau list, tetep jadi list
         else:
-            self.rnn_units = list(rnn_units)
+            self.rnn_unit = list(rnn_unit)
         
         # Kalau boolean, jadiin list
         if isinstance(bidirectional, bool):
-            self.bidirectional = [bidirectional] * len(self.rnn_units)
+            self.bidirectional = [bidirectional] * len(self.rnn_unit)
         # Kalau list, tetep jadi list
         else:
             self.bidirectional = list(bidirectional)
 
-        if len(self.bidirectional) != len(self.rnn_units):
-            raise ValueError(f"Panjang `bidirectional` ({len(self.bidirectional)}) dan `rnn_units` ({len(self.rnn_units)}) harus sama.")
+        if len(self.bidirectional) != len(self.rnn_unit):
+            raise ValueError(f"Panjang `bidirectional` ({len(self.bidirectional)}) dan `rnn_unit` ({len(self.rnn_unit)}) harus sama.")
             
         self.num_classes       = num_classes
         self.sequence_length   = sequence_length
@@ -37,10 +45,10 @@ class SimpleRNNModel:
         self.w_dir = pathlib.Path(w_dir)
         self.w_dir.mkdir(parents=True, exist_ok=True)
 
-        self._dropout_rate  = 0.20
-        self._learning_rate = 0.005
+        self._dropout_rate  = 0.3
+        self._learning_rate = 0.0001
 
-    def build_model(self, dropout_rate : float = 0.20, learning_rate: float = 0.005):
+    def build_model(self, dropout_rate : float = 0.3, learning_rate: float = 0.0001):
         self._dropout_rate  = dropout_rate
         self._learning_rate = learning_rate
 
@@ -56,11 +64,11 @@ class SimpleRNNModel:
             )
         )
 
-        for idx in range(len(self.rnn_units)):
-            units = self.rnn_units[idx]
+        for idx in range(len(self.rnn_unit)):
+            units = self.rnn_unit[idx]
             b = self.bidirectional[idx]
 
-            if idx < len(self.rnn_units) - 1:
+            if idx < len(self.rnn_unit) - 1:
                 return_sequences = True
             else:
                 return_sequences = False
@@ -89,7 +97,7 @@ class SimpleRNNModel:
         self.model = m
         self.model.summary()
 
-    def train(self, x_train, y_train, x_val, y_val, epochs: int = 10, batch_size: int = 32, **fit_kwargs):
+    def train(self, x_train, y_train, x_val, y_val, epochs: int = 10, batch_size: int = 128, **fit_kwargs):
 
         if self.model is None:
             print("Model belum ada")
@@ -132,3 +140,98 @@ class SimpleRNNModel:
         self.model.load_weights(path)
 
         print(f"Bobot dimuat dari {path}")
+
+    def load_layer_weights(self, layer_idx):
+        layer = self.model.layers[layer_idx]
+        weights = layer.get_weights()
+        
+        weights_float32 = []
+        for w in weights:
+            weights_float32.append(w.astype(np.float32))
+        
+        return layer, weights_float32
+   
+    def forward_scratch(self, input_sequences):
+        if self.model is None:
+            raise ValueError("Model belum ada")
+        
+        batch_size = input_sequences.shape[0]
+        outputs = []
+        
+        for idx in tqdm(range(batch_size), desc="Forward Propagation", ncols=80):
+            sequence = input_sequences[idx]
+            
+            layer_idx = 0
+            
+            # 1. Layer Embedding
+            _, weights = self.load_layer_weights(layer_idx)
+            matriks_embedding = weights[0] 
+            
+            embedded = embedding_forward(sequence, matriks_embedding)
+            layer_idx += 1
+
+            x = embedded
+            
+            # 2. Layer RNN
+            for rnn_idx in range(len(self.rnn_unit)):
+                layer, weights = self.load_layer_weights(layer_idx)
+                
+                if rnn_idx < len(self.rnn_unit) - 1:
+                    return_sequences = True
+                else:
+                    return_sequences = False
+                
+                # Bidirectional 
+                if self.bidirectional[rnn_idx]:
+                    
+                    # Forward 
+                    W_input_hidden_maju = weights[0]   
+                    W_hidden_hidden_maju = weights[1]  
+                    b_maju = weights[2]                
+                    
+                    # Backward
+                    W_input_hidden_mundur = weights[3]   
+                    W_hidden_hidden_mundur = weights[4]  
+                    b_mundur = weights[5]                
+                    
+                    hidden_size = self.rnn_unit[rnn_idx]
+                    h_init_fwd = np.zeros(hidden_size, dtype=np.float32)
+                    h_init_bwd = np.zeros(hidden_size, dtype=np.float32)
+                    
+                    x = bidirectional_rnn_layer_forward(
+                        x, 
+                        h_init_fwd, W_input_hidden_maju, W_hidden_hidden_maju, b_maju,
+                        h_init_bwd, W_input_hidden_mundur, W_hidden_hidden_mundur, b_mundur,
+                        merge_mode="concat",
+                        return_sekuens=return_sequences
+                    )
+                else:
+                    # Unidirectional
+                    W_input_hidden = weights[0]   
+                    W_hidden_hidden = weights[1]  
+                    b = weights[2]                
+                    
+                    hidden_size = self.rnn_unit[rnn_idx]
+                    h_init = np.zeros(hidden_size, dtype=np.float32)
+                    
+                    x = rnn_layer_forward(
+                        x, h_init, W_input_hidden, W_hidden_hidden, b,
+                        return_sekuens=return_sequences
+                    )
+                
+                layer_idx += 1
+            
+            # 3. Layer Dropout
+            x = dropout_forward(x)
+            layer_idx += 1
+            
+            # 4. Layer Dense
+            _, weights = self.load_layer_weights(layer_idx)
+            W_dense = weights[0]
+            b_dense = weights[1]
+            
+            output = dense_forward(x, W_dense, b_dense, fungsi_aktivasi="softmax")
+            
+            outputs.append(output)
+        
+        return np.array(outputs)
