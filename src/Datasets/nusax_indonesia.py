@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
-from keras.layers import TextVectorization
+from tensorflow.keras.layers import TextVectorization
+from tensorflow.keras.preprocessing.text import Tokenizer
 from sklearn.preprocessing import LabelEncoder
+
 import os
 
 class NusaxIndonesiaDataset:
-    def __init__(self, token_maksimum=10000, panjang_sekuens=250):
+    def __init__(self, token_maksimum=10000):
         # Path
         lokasi_sekarang = os.path.abspath(__file__) 
         folder_dataset = os.path.dirname(lokasi_sekarang) 
@@ -17,7 +19,7 @@ class NusaxIndonesiaDataset:
         
         # Konfigurasi
         self.token_maksimum = token_maksimum
-        self.panjang_sekuens = panjang_sekuens
+        self.panjang_sekuens = None # Nanti dioverride setelah loading data
         
         # Data Variable
         self.x_train_text = []
@@ -49,9 +51,8 @@ class NusaxIndonesiaDataset:
         except Exception as e:
             print(f"Error saat memuat {path}: {e}")
             return None, None
-    
-    def load_preproses_data(self):
-        print("1. Memuat Data")
+        
+    def load_count_sequences(self):
         self.x_train_text, self.y_train_text = self.load_data_csv(self.file_train)
         self.x_val_text, self.y_val_text = self.load_data_csv(self.file_validasi)
         self.x_test_text, self.y_test_text = self.load_data_csv(self.file_test)
@@ -60,6 +61,23 @@ class NusaxIndonesiaDataset:
         print(f"Jumlah data validasi: {len(self.x_val_text)}")
         print(f"Jumlah data test: {len(self.x_test_text)}")
 
+        tokenizer = Tokenizer(num_words=10000, oov_token="<OOV>")
+
+        t = self.x_train_text + self.x_val_text + self.x_test_text
+        tokenizer.fit_on_texts(t)
+        arr = ["train", "val", "test"]
+        sequence_lengths = []
+        for idx, texts in enumerate ([self.x_train_text, self.x_val_text, self.x_test_text]):
+            tokenized_sequences = tokenizer.texts_to_sequences(texts)
+            sequence_lengths = [len(seq) for seq in tokenized_sequences]
+            sequence_length = int(np.percentile(sequence_lengths, 95))
+            sequence_lengths.append(sequence_length)
+            print(f"Max sequence length ({arr[idx]}): {sequence_length}")
+        self.panjang_sekuens = max(sequence_lengths)
+
+    def load_preproses_data(self):
+        print("1. Memuat Data")
+        self.load_count_sequences()
         print("\n2. Label Encoding")
         self.label_encoder = LabelEncoder()
         all_labels_for_fitting = self.y_train_text + self.y_val_text + self.y_test_text
